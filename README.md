@@ -1,2 +1,2 @@
-Admin-register new employee,update,search,login,validation,session
+Admin-register new employee,update,delete,search,login,validation,session
 Route::resource('/app','AppController');
