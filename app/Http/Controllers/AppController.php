@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\app;
 use Illuminate\Http\Request;
 use App\Http\Requests\UserRequest;
+use Illuminate\Support\Facades\Http;
 use Validator;
 use App\User;
 
@@ -31,6 +32,19 @@ class AppController extends Controller
         $users  = App::all();
         return view('home.userlist')->with('users', $users);
     }
+    public function pdf(){
+        $users  = App::get();
+        
+        $filename = 'userlist.pdf';
+        $mpdf = new \Mpdf\Mpdf([
+            'margin-left' => 10
+        ]);
+        $html = \View::make('home.userpdf')->with('users', $users);
+        $html = $html->render();
+        $mpdf->WriteHtml($html);
+        $mpdf->Output($filename,'I');
+        
+    }
     public function create()
     {
         return view('home.create');
@@ -44,16 +58,23 @@ class AppController extends Controller
      */
     public function store(UserRequest $request)
     {
+        
                 $user = new app();
                 $user->username     = $request->username;
                 $user->password     = $request->password;
                 $user->name         = $request->name;
                 $user->type         = $request->type;
+                if($user->type =="admin")
+                {
                 if($user->save()){
                     return redirect()->route('home.userlist');
                 }else{
-                    return back();
+                    return $error->flash('err', 'must be admin');
                 }
+            }
+            else{
+                return back();
+            }
     }
 
     /**
@@ -102,15 +123,11 @@ class AppController extends Controller
      */
     public function delete($id){
         
-        return view('home.delete');
-    }
-    public function destroy($id)
-    {
+        $user = app::find($id);
 
-        $user = DB::table('user')->where('id',$id)->delete();
+        $user->delete();
 
-        return view('home.userlist');
-       
+        return redirect()->route('home.userlist');
     }
     public function index2()
     {
@@ -122,7 +139,11 @@ class AppController extends Controller
        if($request->ajax()){
     
          $output="";
-         $products = app::where('username','LIKE','%'.$request->search."%")->get();
+         $products = app::where('username','LIKE','%'.$request->search."%")
+         ->orWhere('id', 'LIKE','%'.$request->search."%")
+         ->orWhere('name','LIKE','%'.$request->search."%")
+         ->orWhere('type', 'LIKE','%'.$request->search."%")
+         ->get();
          
          if($products){
       
@@ -134,7 +155,7 @@ class AppController extends Controller
              
              '<td>'.$product->username.'</td>'.
              
-             '<td>'.$product->password.'</td>'.
+             '<td>'.$product->type.'</td>'.
              
              '<td>'.$product->name.'</td>'.
              
@@ -148,5 +169,18 @@ class AppController extends Controller
        }
  
     }
+    public function salarylist(){
+        
+       return show(); 
+
+    }
+    public function show(){
+        $client = new \GuzzleHttp\Client();
+        $response = $client->request('GET', 'http://localhost:3000/adminhome/userlist');
+        
+        return redirect()->route('home.show')->response()->getBody(); 
+
+    }
+    
 
 }
