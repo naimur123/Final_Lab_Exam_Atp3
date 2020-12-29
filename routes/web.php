@@ -23,7 +23,8 @@ Route::group(['middleware'=>['sess']], function(){
 
 	Route::get('/app/home', 'AppController@index')->middleware('sess')->name('home.home');
 	//Route::get('/app/userlist', 'AppController@userlist');
-    Route::get('/app/userlist','AppController@userlist')->name('home.userlist');
+	Route::get('/app/userlist','AppController@userlist')->name('home.userlist');
+	Route::get('/app/pdf','AppController@pdf')->name('home.pdf');
     Route::get('/app/create', 'AppController@create')->name('home.create');
 	Route::post('/app/create', 'AppController@store');
 	Route::get('/app/users', 'AppController@index2');
@@ -31,6 +32,8 @@ Route::group(['middleware'=>['sess']], function(){
 	Route::get('/app/user/edit/{id}', 'AppController@edit')->name('home.edit');
 	Route::post('/app/user/edit/{id}', 'AppController@update');
 	Route::get('/app/delete/{id}', 'AppController@delete');
-	Route::post('/app/delete/{id}', 'AppController@destroy');
+
+	
+	
 });
 Route::resource('/app','AppController');
